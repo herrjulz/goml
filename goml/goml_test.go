@@ -25,6 +25,10 @@ array:
 mapArray:
 - foo: bar
   zoo: lion
+  arr:
+  - one
+  - two
+  - three
 - foo: var
   boo: laa`
 	})
@@ -38,6 +42,8 @@ mapArray:
 			Expect(Get(yml, "mapArray.0.foo")).To(Equal("bar"))
 			Expect(Get(yml, "mapArray.foo:var.boo")).To(Equal("laa"))
 			Expect(Get(yml, "array.:var")).To(Equal("var"))
+			Expect(Get(yml, "mapArray.foo:bar.arr.0")).To(Equal("one"))
+
 		})
 	})
 
@@ -57,6 +63,9 @@ mapArray:
 
 			Set(yml, "array.:optimusPrime", "pikachu")
 			Expect(Get(yml, "array.:pikachu")).To(Equal("pikachu"))
+
+			Set(yml, "mapArray.foo:bar.arr.0", "new")
+			Expect(Get(yml, "mapArray.foo:bar.arr.0")).To(Equal("new"))
 		})
 	})
 

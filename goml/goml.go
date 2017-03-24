@@ -11,7 +11,8 @@ import (
 )
 
 func Get(yml *simpleyaml.Yaml, path string) (interface{}, error) {
-	res, err := get(yml, path).String()
+	val, _ := get(yml, path)
+	res, err := val.String()
 	if err != nil {
 		return "", err
 	}
@@ -25,40 +26,45 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	newPath := strings.Join(props, ".")
 
 	if index, err := strconv.Atoi(propName); err == nil {
-		prop, err := get(yml, newPath).Array()
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
 		if err != nil {
 			return err
 		}
 
 		prop[index] = val
-		updateYaml(*yml, props, prop)
+
+		updateYaml(yml, props, prop)
 		return nil
 	}
 
 	if propName == "+" {
-		prop, err := get(yml, newPath).Array()
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
 		if err != nil {
 			return err
 		}
 
 		prop = append(prop, val)
-		updateYaml(*yml, props, prop)
+		updateYaml(yml, props, prop)
 		return nil
 	}
 
 	if strings.Contains(propName, ":") {
-		prop, err := get(yml, newPath).Array()
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
 		if err != nil {
 			return err
 		}
 
 		index := returnIndexForProp(propName, prop)
 		prop[index] = val
-		updateYaml(*yml, props, prop)
+		updateYaml(yml, props, prop)
 		return nil
 	}
 
-	prop, err := get(yml, newPath).Map()
+	tmp, _ := get(yml, newPath)
+	prop, err := tmp.Map()
 	if err != nil {
 		return err
 	}
@@ -74,7 +80,8 @@ func Delete(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
 	props = props[:len(props)-1]
 	newPath := strings.Join(props, ".")
 
-	res, err := get(yml, newPath).Map()
+	tmp, _ := get(yml, newPath)
+	res, err := tmp.Map()
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +127,14 @@ func ReadYamlFromFile(filename string) (*simpleyaml.Yaml, error) {
 	return yml, nil
 }
 
-func get(yml *simpleyaml.Yaml, path string) *simpleyaml.Yaml {
+func get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, []string) {
+	solvedPath := []string{}
+
 	props := strings.Split(path, ".")
 	for _, p := range props {
 		if index, err := strconv.Atoi(p); err == nil {
 			yml = yml.GetIndex(index)
+			solvedPath = append(solvedPath, strconv.Itoa(index))
 			continue
 		}
 
@@ -132,18 +142,27 @@ func get(yml *simpleyaml.Yaml, path string) *simpleyaml.Yaml {
 			if prop, err := yml.Array(); err == nil {
 				index := returnIndexForProp(p, prop)
 				yml = yml.GetIndex(index)
+				solvedPath = append(solvedPath, strconv.Itoa(index))
 				continue
 			}
 		}
+		solvedPath = append(solvedPath, p)
 		yml = yml.Get(p)
 	}
-	return yml
+	return yml, solvedPath
 }
 
-func updateYaml(yml simpleyaml.Yaml, props []string, prop []interface{}) {
+func updateYaml(yml *simpleyaml.Yaml, props []string, prop []interface{}) {
+	var yaml map[interface{}]interface{}
 	propName := props[len(props)-1]
-	props = props[:len(props)-1]
-	yaml, _ := yml.GetPath(props...).Map()
+
+	if len(props) > 1 {
+		props = props[:len(props)-1]
+		tmp, _ := get(yml, strings.Join(props, "."))
+		yaml, _ = tmp.Map()
+	} else {
+		yaml, _ = yml.Map()
+	}
 
 	yaml[propName] = prop
 }
