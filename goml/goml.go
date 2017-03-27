@@ -1,6 +1,7 @@
 package goml
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -12,11 +13,51 @@ import (
 
 func Get(yml *simpleyaml.Yaml, path string) (interface{}, error) {
 	val, _ := get(yml, path)
-	res, err := val.String()
-	if err != nil {
-		return "", err
-	}
+	// res, err := val.String()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	res := extractType(val)
 	return res, nil
+}
+
+func extractType(value *simpleyaml.Yaml) interface{} {
+	if v, err := value.String(); err == nil {
+		return v
+	}
+	if v, err := value.Bool(); err == nil {
+		return strconv.FormatBool(v)
+	}
+	if v, err := value.Int(); err == nil {
+		return strconv.Itoa(v)
+	}
+	if v, err := value.Array(); err == nil {
+		strSl := []string{}
+		for _, val := range v {
+			tmp := extractArrayType(val)
+			strSl = append(strSl, tmp)
+		}
+		str := strings.Join(strSl, ",")
+		return str
+	}
+	if v, err := value.Map(); err == nil {
+		return v
+	}
+	return nil
+}
+
+func extractArrayType(value interface{}) string {
+	switch t := value.(type) {
+	default:
+		fmt.Printf("unexpected type %T\n", t)
+	case string:
+		return value.(string)
+	case bool:
+		return strconv.FormatBool(value.(bool))
+	case int:
+		return strconv.Itoa(value.(int))
+	}
+	return ""
 }
 
 func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {

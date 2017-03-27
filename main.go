@@ -66,13 +66,15 @@ func getParam(c *cli.Context) {
 	yaml, err := goml.ReadYamlFromFile(c.String("file"))
 	exitWithError(err)
 
-	value, err := goml.Get(yaml, c.String("prop"))
-	exitWithError(err)
+	rawValue, _ := goml.Get(yaml, c.String("prop"))
+	// exitWithError(err)
 
-	if value == "" {
+	if rawValue == nil {
 		exitWithError(errors.New("Couldn't find property"))
 	}
-	fmt.Printf("%s", value)
+
+	// fmt.Printf("%s", rawValue)
+	fmt.Println(rawValue)
 }
 
 func setParam(c *cli.Context) {
