@@ -11,17 +11,13 @@ import (
 	"github.com/smallfish/simpleyaml"
 )
 
-func Get(yml *simpleyaml.Yaml, path string) (interface{}, error) {
+func Get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
 	val, _ := get(yml, path)
-	// res, err := val.String()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	res := extractType(val)
-	return res, nil
+	// res := extractType(val)
+	return val, nil
 }
 
-func extractType(value *simpleyaml.Yaml) interface{} {
+func ExtractType(value *simpleyaml.Yaml) interface{} {
 	if v, err := value.String(); err == nil {
 		return v
 	}
@@ -112,6 +108,30 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 
 	prop[propName] = val
 
+	return nil
+}
+
+func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml) error {
+	if v, err := value.String(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
+	if v, err := value.Bool(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
+	if v, err := value.Int(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
+	if v, err := value.Array(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
+	if v, err := value.Map(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
 	return nil
 }
 

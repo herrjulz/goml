@@ -52,6 +52,18 @@ func main() {
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
 			},
 		},
+		{
+			Name:      "transfer",
+			Usage:     "transfer property",
+			ArgsUsage: "transfer",
+			Action:    transferParam,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
+				cli.StringFlag{Name: "prop, p", Usage: "property path (string) - foo.bar.zoo"},
+				cli.StringFlag{Name: "df", Usage: "destination YAML file"},
+				cli.StringFlag{Name: "dp", Usage: "destination property path (string) - foo.bar.zoo"},
+			},
+		},
 	}
 	cmd.Run(os.Args)
 }
@@ -73,8 +85,10 @@ func getParam(c *cli.Context) {
 		exitWithError(errors.New("Couldn't find property"))
 	}
 
+	res := goml.ExtractType(rawValue)
+
 	// fmt.Printf("%s", rawValue)
-	fmt.Println(rawValue)
+	fmt.Println(res)
 }
 
 func setParam(c *cli.Context) {
@@ -106,6 +120,27 @@ func deleteParam(c *cli.Context) {
 	exitWithError(err)
 
 	goml.WriteYaml(updatedYaml, c.String("file"))
+}
+
+func transferParam(c *cli.Context) {
+	if c.NumFlags() != 6 {
+		cli.ShowAppHelp(c)
+		exitWithError(errors.New("invalid number of arguments"))
+		os.Exit(1)
+	}
+
+	sourceYaml, err := goml.ReadYamlFromFile(c.String("file"))
+	exitWithError(err)
+
+	destYaml, err := goml.ReadYamlFromFile(c.String("df"))
+	exitWithError(err)
+
+	value, _ := goml.Get(sourceYaml, c.String("prop"))
+
+	err = goml.SetValueForType(destYaml, c.String("dp"), value)
+	exitWithError(err)
+
+	goml.WriteYaml(destYaml, c.String("df"))
 }
 
 func exitWithError(err error) {
