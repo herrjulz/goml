@@ -85,7 +85,8 @@ func getParam(c *cli.Context) {
 		exitWithError(errors.New("Couldn't find property"))
 	}
 
-	res := goml.ExtractType(rawValue)
+	res, err := goml.ExtractType(rawValue)
+	exitWithError(err)
 
 	// fmt.Printf("%s", rawValue)
 	fmt.Println(res)

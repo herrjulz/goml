@@ -1,31 +1,30 @@
 package goml
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/smallfish/simpleyaml"
+	"gopkg.in/yaml.v2"
 )
 
 func Get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
 	val, _ := get(yml, path)
-	// res := extractType(val)
 	return val, nil
 }
 
-func ExtractType(value *simpleyaml.Yaml) interface{} {
+func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
 	if v, err := value.String(); err == nil {
-		return v
+		return v, nil
 	}
 	if v, err := value.Bool(); err == nil {
-		return strconv.FormatBool(v)
+		return strconv.FormatBool(v), nil
 	}
 	if v, err := value.Int(); err == nil {
-		return strconv.Itoa(v)
+		return strconv.Itoa(v), nil
 	}
 	if v, err := value.Array(); err == nil {
 		strSl := []string{}
@@ -34,12 +33,12 @@ func ExtractType(value *simpleyaml.Yaml) interface{} {
 			strSl = append(strSl, tmp)
 		}
 		str := strings.Join(strSl, ",")
-		return str
+		return str, nil
 	}
 	if v, err := value.Map(); err == nil {
-		return v
+		return v, nil
 	}
-	return nil
+	return nil, errors.New("property not found")
 }
 
 func extractArrayType(value interface{}) string {
@@ -57,9 +56,10 @@ func extractArrayType(value interface{}) string {
 }
 
 func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
-	props := strings.Split(path, ".")
-	propName := props[len(props)-1]
-	props = props[:len(props)-1]
+	propsArr := strings.Split(path, ".")
+	fmt.Println("props", propsArr)
+	propName := propsArr[len(propsArr)-1]
+	props := propsArr[:len(propsArr)-1]
 	newPath := strings.Join(props, ".")
 
 	if index, err := strconv.Atoi(propName); err == nil {
@@ -98,6 +98,14 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		prop[index] = val
 		updateYaml(yml, props, prop)
 		return nil
+	}
+
+	fmt.Println(len(propsArr), props)
+	if len(propsArr) == 1 {
+		prop, _ := yml.Map()
+		fmt.Println("prop", prop[path])
+		prop[path] = val
+
 	}
 
 	tmp, _ := get(yml, newPath)
@@ -184,6 +192,14 @@ func ReadYamlFromFile(filename string) (*simpleyaml.Yaml, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//val := yaml.MapSlice{}
+	//err = yaml.Unmarshal([]byte(file), &val)
+	//if err != nil {
+	//return nil, errors.New("unmarshal []byte to yaml failed: " + err.Error())
+	//}
+	//fmt.Printf("--- m:\n%v\n\n", val)
+
 	yml, _ := simpleyaml.NewYaml(file)
 	return yml, nil
 }
