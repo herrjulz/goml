@@ -68,7 +68,7 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 			return err
 		}
 
-		prop[index] = val
+		prop[index] = convertValueType(val)
 
 		updateYaml(yml, props, prop)
 		return nil
@@ -94,14 +94,14 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		}
 
 		index := returnIndexForProp(propName, prop)
-		prop[index] = val
+		prop[index] = convertValueType(val)
 		updateYaml(yml, props, prop)
 		return nil
 	}
 
 	if len(propsArr) == 1 {
 		prop, _ := yml.Map()
-		prop[path] = val
+		prop[path] = convertValueType(val)
 		return nil
 	}
 
@@ -111,9 +111,25 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		return err
 	}
 
-	prop[propName] = val
+	prop[propName] = convertValueType(val)
 
 	return nil
+}
+
+func convertValueType(val interface{}) interface{} {
+	switch val.(type) {
+	default:
+		return val
+	case string:
+		str := val.(string)
+		if value, err := strconv.Atoi(str); err == nil {
+			return value
+		}
+		if value, err := strconv.ParseBool(str); err == nil {
+			return value
+		}
+	}
+	return val
 }
 
 func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml) error {
