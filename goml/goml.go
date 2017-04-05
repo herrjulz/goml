@@ -57,7 +57,6 @@ func extractArrayType(value interface{}) string {
 
 func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	propsArr := strings.Split(path, ".")
-	fmt.Println("props", propsArr)
 	propName := propsArr[len(propsArr)-1]
 	props := propsArr[:len(propsArr)-1]
 	newPath := strings.Join(props, ".")
@@ -100,12 +99,10 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		return nil
 	}
 
-	fmt.Println(len(propsArr), props)
 	if len(propsArr) == 1 {
 		prop, _ := yml.Map()
-		fmt.Println("prop", prop[path])
 		prop[path] = val
-
+		return nil
 	}
 
 	tmp, _ := get(yml, newPath)
