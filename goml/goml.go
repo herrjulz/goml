@@ -116,6 +116,63 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	return nil
 }
 
+func Delete(yml *simpleyaml.Yaml, path string) error {
+	propsArr := strings.Split(path, ".")
+	propName := propsArr[len(propsArr)-1]
+	props := propsArr[:len(propsArr)-1]
+	newPath := strings.Join(props, ".")
+
+	if index, err := strconv.Atoi(propName); err == nil {
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
+		if err != nil {
+			return err
+		}
+
+		prop = append(prop[:index], prop[index+1:]...)
+
+		updateYaml(yml, props, prop)
+		return nil
+	}
+
+	if strings.Contains(propName, ":") {
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
+		if err != nil {
+			return err
+		}
+
+		index := returnIndexForProp(propName, prop)
+		prop = append(prop[:index], prop[index+1:]...)
+		updateYaml(yml, props, prop)
+		return nil
+	}
+
+	var res map[interface{}]interface{}
+	if len(propsArr) == 1 {
+		tmp, err := yml.Map()
+		if err != nil {
+			return err
+		}
+		res = tmp
+	} else {
+		prop, _ := get(yml, newPath)
+		tmp, err := prop.Map()
+		if err != nil {
+			return err
+		}
+		res = tmp
+	}
+	_, ok := res[propName]
+	if ok {
+		delete(res, propName)
+	} else {
+		return errors.New("property not found")
+	}
+
+	return nil
+}
+
 func convertValueType(val interface{}) interface{} {
 	switch val.(type) {
 	default:
@@ -156,25 +213,25 @@ func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml)
 	return nil
 }
 
-func Delete(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
-	props := strings.Split(path, ".")
-	propName := props[len(props)-1]
-	props = props[:len(props)-1]
-	newPath := strings.Join(props, ".")
+//func Delete(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
+//props := strings.Split(path, ".")
+//propName := props[len(props)-1]
+//props = props[:len(props)-1]
+//newPath := strings.Join(props, ".")
 
-	tmp, _ := get(yml, newPath)
-	res, err := tmp.Map()
-	if err != nil {
-		return nil, err
-	}
+//tmp, _ := get(yml, newPath)
+//res, err := tmp.Map()
+//if err != nil {
+//return nil, err
+//}
 
-	_, ok := res[propName]
-	if ok {
-		delete(res, propName)
-	}
+//_, ok := res[propName]
+//if ok {
+//delete(res, propName)
+//}
 
-	return yml, nil
-}
+//return yml, nil
+//}
 
 func WriteYaml(yml *simpleyaml.Yaml, file string) error {
 	goml, err := yml.Map()

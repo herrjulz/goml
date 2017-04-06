@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/JulzDiverse/goml/goml"
+	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
@@ -79,7 +80,6 @@ func getParam(c *cli.Context) {
 	exitWithError(err)
 
 	rawValue, _ := goml.Get(yaml, c.String("prop"))
-	// exitWithError(err)
 
 	if rawValue == nil {
 		exitWithError(errors.New("Couldn't find property"))
@@ -88,7 +88,6 @@ func getParam(c *cli.Context) {
 	res, err := goml.ExtractType(rawValue)
 	exitWithError(err)
 
-	// fmt.Printf("%s", rawValue)
 	fmt.Println(res)
 }
 
@@ -111,23 +110,23 @@ func deleteParam(c *cli.Context) {
 	if c.NumFlags() != 4 {
 		cli.ShowAppHelp(c)
 		exitWithError(errors.New("invalid number of arguments"))
-		os.Exit(1)
 	}
 
 	yaml, err := goml.ReadYamlFromFile(c.String("file"))
 	exitWithError(err)
 
-	updatedYaml, err := goml.Delete(yaml, c.String("prop"))
-	exitWithError(err)
+	err = goml.Delete(yaml, c.String("prop"))
+	if err != nil {
+		exitWithError(errors.New("Couldn't delete property for path: " + c.String("prop")))
+	}
 
-	goml.WriteYaml(updatedYaml, c.String("file"))
+	goml.WriteYaml(yaml, c.String("file"))
 }
 
 func transferParam(c *cli.Context) {
 	if c.NumFlags() != 6 {
 		cli.ShowAppHelp(c)
 		exitWithError(errors.New("invalid number of arguments"))
-		os.Exit(1)
 	}
 
 	sourceYaml, err := goml.ReadYamlFromFile(c.String("file"))
@@ -146,7 +145,8 @@ func transferParam(c *cli.Context) {
 
 func exitWithError(err error) {
 	if err != nil {
-		fmt.Println(err)
+		r := color.New(color.FgHiRed)
+		r.Println(err)
 		os.Exit(1)
 	}
 }
