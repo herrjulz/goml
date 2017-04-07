@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/JulzDiverse/goml/goml"
@@ -20,44 +21,41 @@ func main() {
 	}
 	cmd.Name = "goml"
 	cmd.Usage = "CLI Tool to do CRUD like manipulation on YAML files"
-	cmd.Version = "0.0.1"
+	cmd.Version = "0.1.0"
 	cmd.Commands = []cli.Command{
 		{
-			Name:      "get",
-			Usage:     "Get property",
-			ArgsUsage: "foo.bar.zoo",
-			Action:    getParam,
+			Name:   "get",
+			Usage:  "Get property",
+			Action: getParam,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
 			},
 		},
 		{
-			Name:      "set",
-			Usage:     "Set property",
-			ArgsUsage: "get foo.bar.zoo ",
-			Action:    setParam,
+			Name:   "set",
+			Usage:  "Set/Update property",
+			Action: setParam,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
-				cli.StringFlag{Name: "value, v", Usage: "set the value for the defined property"},
+				cli.StringFlag{Name: "value, v", Usage: "value for the defined property"},
+				cli.StringFlag{Name: "key, k", Usage: "private key file"},
 			},
 		},
 		{
-			Name:      "delete",
-			Usage:     "delete property",
-			ArgsUsage: "delete foo.bar.zoo ",
-			Action:    deleteParam,
+			Name:   "delete",
+			Usage:  "Delete property",
+			Action: deleteParam,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
 			},
 		},
 		{
-			Name:      "transfer",
-			Usage:     "transfer property",
-			ArgsUsage: "transfer",
-			Action:    transferParam,
+			Name:   "transfer",
+			Usage:  "Transfer property",
+			Action: transferParam,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
 				cli.StringFlag{Name: "prop, p", Usage: "property path (string) - foo.bar.zoo"},
@@ -79,13 +77,7 @@ func getParam(c *cli.Context) {
 	yaml, err := goml.ReadYamlFromFile(c.String("file"))
 	exitWithError(err)
 
-	rawValue, _ := goml.Get(yaml, c.String("prop"))
-
-	if rawValue == nil {
-		exitWithError(errors.New("Couldn't find property"))
-	}
-
-	res, err := goml.ExtractType(rawValue)
+	res, err := goml.Get(yaml, c.String("prop"))
 	exitWithError(err)
 
 	fmt.Println(res)
@@ -100,9 +92,17 @@ func setParam(c *cli.Context) {
 	yaml, err := goml.ReadYamlFromFile(c.String("file"))
 	exitWithError(err)
 
-	err = goml.Set(yaml, c.String("prop"), c.String("value"))
-	exitWithError(err)
+	var value string
+	if c.String("value") != "" {
+		value = c.String("value")
+	} else if c.String("key") != "" {
+		bytes, err := ioutil.ReadFile(c.String("key"))
+		exitWithError(err)
+		value = string(bytes)
+	}
 
+	err = goml.Set(yaml, c.String("prop"), value)
+	exitWithError(err)
 	goml.WriteYaml(yaml, c.String("file"))
 }
 
@@ -137,7 +137,7 @@ func transferParam(c *cli.Context) {
 
 	value, _ := goml.Get(sourceYaml, c.String("prop"))
 
-	err = goml.SetValueForType(destYaml, c.String("dp"), value)
+	err = goml.Set(destYaml, c.String("dp"), value)
 	exitWithError(err)
 
 	goml.WriteYaml(destYaml, c.String("df"))

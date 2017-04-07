@@ -11,9 +11,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func Get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
-	val, _ := get(yml, path)
-	return val, nil
+func Get(yml *simpleyaml.Yaml, path string) (interface{}, error) {
+	val, ok := get(yml, path)
+	if ok == nil {
+		return nil, errors.New("property not found")
+	}
+
+	result, err := ExtractType(val)
+	return result, err
 }
 
 func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
@@ -63,6 +68,10 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 
 	if index, err := strconv.Atoi(propName); err == nil {
 		tmp, props := get(yml, newPath)
+		if props == nil {
+			return errors.New("peroperty not found")
+		}
+
 		prop, err := tmp.Array()
 		if err != nil {
 			return err
@@ -80,8 +89,8 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		if err != nil {
 			return err
 		}
-
-		prop = append(prop, val)
+		resolved := convertValueType(val)
+		prop = append(prop, resolved)
 		updateYaml(yml, props, prop)
 		return nil
 	}
@@ -93,7 +102,11 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 			return err
 		}
 
-		index := returnIndexForProp(propName, prop)
+		index, err := returnIndexForProp(propName, prop)
+		if err != nil {
+			return err
+		}
+
 		prop[index] = convertValueType(val)
 		updateYaml(yml, props, prop)
 		return nil
@@ -142,7 +155,11 @@ func Delete(yml *simpleyaml.Yaml, path string) error {
 			return err
 		}
 
-		index := returnIndexForProp(propName, prop)
+		index, err := returnIndexForProp(propName, prop)
+		if err != nil {
+			return err
+		}
+
 		prop = append(prop[:index], prop[index+1:]...)
 		updateYaml(yml, props, prop)
 		return nil
@@ -213,26 +230,6 @@ func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml)
 	return nil
 }
 
-//func Delete(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
-//props := strings.Split(path, ".")
-//propName := props[len(props)-1]
-//props = props[:len(props)-1]
-//newPath := strings.Join(props, ".")
-
-//tmp, _ := get(yml, newPath)
-//res, err := tmp.Map()
-//if err != nil {
-//return nil, err
-//}
-
-//_, ok := res[propName]
-//if ok {
-//delete(res, propName)
-//}
-
-//return yml, nil
-//}
-
 func WriteYaml(yml *simpleyaml.Yaml, file string) error {
 	goml, err := yml.Map()
 	if err != nil {
@@ -287,7 +284,11 @@ func get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, []string) {
 
 		if strings.Contains(p, ":") {
 			if prop, err := yml.Array(); err == nil {
-				index := returnIndexForProp(p, prop)
+				index, err := returnIndexForProp(p, prop)
+				if err != nil {
+					return yml, nil
+				}
+
 				yml = yml.GetIndex(index)
 				solvedPath = append(solvedPath, strconv.Itoa(index))
 				continue
@@ -314,27 +315,25 @@ func updateYaml(yml *simpleyaml.Yaml, props []string, prop []interface{}) {
 	yaml[propName] = prop
 }
 
-func returnIndexForProp(propName string, array []interface{}) int {
-	var index int
-
+func returnIndexForProp(propName string, array []interface{}) (int, error) {
 	keyVal := strings.Split(propName, ":")
 	key, val := keyVal[0], keyVal[1]
 
 	for i, _ := range array {
 		if key == "" {
+
 			check := array[i]
 			if check == val {
-				index = i
-				break
+				return i, nil
 			}
+
 		} else {
 			check := array[i].(map[interface{}]interface{})
 			if check[key] == val {
-				index = i
-				break
+				return i, nil
 			}
 		}
 	}
 
-	return index
+	return 0, errors.New("property not found")
 }

@@ -1,8 +1,21 @@
-# GOML - A YAML manipulation tool written in GO
+# GOML - A CRUD tool for YAML files
+
+With `goml` you can:
+
+- **C** reate YAML properties (option `set`)
+- **R** etrieve YAML properties (option `get`)
+- **U** pdate YAML properties (option `set`)
+- **D** elete YAML properties (option `delete`)
+
+Additionally, you can **transfer** properties from one YAML to another YAML
+
+## Installation
+
+
 
 ## Usage
 
-All example will base on the following example yaml:
+All examples are based on the following yaml:
 
 ```
 map:
@@ -21,10 +34,10 @@ mapArray:
   name: bar
 ```
 
-## Get Property
+## Retrieve Properties with `get`
 
 ```
-$ goml get -file <yaml-file> -prop <path.to.property>
+$ goml get --file <yaml-file> --prop <path.to.property>
 ```
 
 ### Examples:
@@ -63,12 +76,17 @@ $ goml get -f sample.yml -p array.id:two.name
 ```
 
 
-## Set Property
+## Create/Update Properties with `set`
+
+You can use the `set` option to either set or update properties. If an property for a valid path does not exist, goml will add it for you. If an property exists the `set` option will upate this property with the provided value.
+
+Another useful thing you can do with `set` is to set/update a key (eg. ssh private key) from a file.  
 
 **Basic Syntax:**
 
 ```
-$ goml set -file <yaml-file> -prop <path.to.property> -value <new-value>
+$ goml set --file <yaml-file> --prop <path.to.property> --value <new-value>
+$ goml set --file <yaml-file> --prop <path.to.property> --key <key-file>
 ```
 
 ### Examples:
@@ -130,6 +148,61 @@ $ goml set -f sample.yml -p mapArray.id:one.name -v julz
 // for the entry that has id 'one'
 ```
 
-## Delete Property
+**Set key from file `--key, -k`**
 
-**Not Implemented** 
+```
+$ goml set -f sample.yml -p mapArray.id:one.name -k keyfile
+```
+
+## Delete Properties with `delete`
+
+```
+$ goml delete --file <yaml-file> --prop <path.to.property>
+```
+
+### Examples:
+
+**Maps**
+
+Delete value from map:
+
+```
+$ goml delete -f sample.yml -p map.foo.bar
+// deletes value
+```
+**Arrays**
+
+Delete value from array:
+
+```
+$ goml delete -f sample.yml -p array.1
+// deletes two
+```
+
+Delete value from array which contains maps:
+
+```
+$ goml delete -f sample.yml -p array.0.name
+// deletes foo
+```
+
+**Map Arrays**
+
+Delete value from array which contains maps by an identifier:
+
+```
+$ goml delete -f sample.yml -p array.id:two.name
+// deletes bar
+```
+
+## Transfer Properties with `transfer`
+
+Transfer is the same as `set`, with the difference that you specify a destination file and property instead of a value:
+
+```
+$ goml transfer --file <yaml-file> --prop <path.to.property> --df <destination-file> --dp <destination-property>
+```
+
+*Note:*
+- The syntax for the source property is the same as for  `set`
+- The syntax for the destination property is the same as for `get`
