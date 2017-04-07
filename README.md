@@ -11,7 +11,17 @@ Additionally, you can **transfer** properties from one YAML to another YAML
 
 ## Installation
 
+**OS X**
 
+```
+$ wget -O /usr/local/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.1.0/goml-darwin-amd64 && chmod +x /usr/local/bin/goml
+```
+
+**Linux**
+
+```
+$ wget -O /usr/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.1.0/goml-linux-amd64 && chmod +x /usr/bin/goml
+```
 
 ## Usage
 
