@@ -21,6 +21,15 @@ func Get(yml *simpleyaml.Yaml, path string) (interface{}, error) {
 	return result, err
 }
 
+func GetAsSimpleYaml(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, error) {
+	val, ok := get(yml, path)
+	if ok == nil {
+		return nil, errors.New("property not found")
+	}
+
+	return val, nil
+}
+
 func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
 	if v, err := value.String(); err == nil {
 		return v, nil
