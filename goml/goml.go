@@ -40,6 +40,9 @@ func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
 	if v, err := value.Int(); err == nil {
 		return strconv.Itoa(v), nil
 	}
+	if v, err := value.Float(); err == nil {
+		return fmt.Sprint(v), nil
+	}
 	if v, err := value.Array(); err == nil {
 		strSl := []string{}
 		for _, val := range v {
@@ -65,6 +68,8 @@ func extractArrayType(value interface{}) string {
 		return strconv.FormatBool(value.(bool))
 	case int:
 		return strconv.Itoa(value.(int))
+	case float64:
+		return fmt.Sprint(value.(float64))
 	}
 	return ""
 }
@@ -225,6 +230,10 @@ func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml)
 		return err
 	}
 	if v, err := value.Int(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
+	if v, err := value.Float(); err == nil {
 		err := Set(yaml, path, v)
 		return err
 	}
