@@ -40,6 +40,9 @@ func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
 	if v, err := value.Int(); err == nil {
 		return strconv.Itoa(v), nil
 	}
+	if v, err := value.Float(); err == nil {
+		return fmt.Sprint(v), nil
+	}
 	if v, err := value.Array(); err == nil {
 		strSl := []string{}
 		for _, val := range v {
@@ -65,6 +68,8 @@ func extractArrayType(value interface{}) string {
 		return strconv.FormatBool(value.(bool))
 	case int:
 		return strconv.Itoa(value.(int))
+	case float64:
+		return fmt.Sprint(value.(float64))
 	}
 	return ""
 }
@@ -78,7 +83,7 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	if index, err := strconv.Atoi(propName); err == nil {
 		tmp, props := get(yml, newPath)
 		if props == nil {
-			return errors.New("peroperty not found")
+			return errors.New("property not found")
 		}
 
 		prop, err := tmp.Array()
@@ -228,6 +233,10 @@ func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml)
 		err := Set(yaml, path, v)
 		return err
 	}
+	if v, err := value.Float(); err == nil {
+		err := Set(yaml, path, v)
+		return err
+	}
 	if v, err := value.Array(); err == nil {
 		err := Set(yaml, path, v)
 		return err
@@ -250,9 +259,7 @@ func WriteYaml(yml *simpleyaml.Yaml, file string) error {
 		return err
 	}
 
-	ioutil.WriteFile(file, gomlSave, 0644)
-
-	return nil
+	return ioutil.WriteFile(file, gomlSave, 0644)
 }
 
 func ReadYaml(yaml []byte) (*simpleyaml.Yaml, error) {
@@ -269,15 +276,7 @@ func ReadYamlFromFile(filename string) (*simpleyaml.Yaml, error) {
 		return nil, err
 	}
 
-	//val := yaml.MapSlice{}
-	//err = yaml.Unmarshal([]byte(file), &val)
-	//if err != nil {
-	//return nil, errors.New("unmarshal []byte to yaml failed: " + err.Error())
-	//}
-	//fmt.Printf("--- m:\n%v\n\n", val)
-
-	yml, _ := simpleyaml.NewYaml(file)
-	return yml, nil
+	return simpleyaml.NewYaml(file)
 }
 
 func get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, []string) {
