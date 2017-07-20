@@ -1,2 +1,3 @@
 goml-linux-amd64
 goml-darwin-amd64
+vendor/*
