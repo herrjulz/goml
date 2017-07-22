@@ -10,13 +10,25 @@ import (
 )
 
 func SetKeyInFile(file string, path string, key string) error {
+	yaml, err := ReadYamlFromFile(file)
+	if err != nil {
+		return err
+	}
+
+	err = SetKey(yaml, path, key)
+	if err != nil {
+		return err
+	}
+
+	return WriteYaml(yaml, file)
+}
+
+func SetKey(yaml *simpleyaml.Yaml, path string, key string) error {
 	bytes, err := ioutil.ReadFile(key)
 	if err != nil {
 		return err
 	}
-	value := string(bytes)
-
-	return SetInFile(file, path, value)
+	return Set(yaml, path, string(bytes))
 }
 
 func SetInFile(file string, path string, val interface{}) error {
