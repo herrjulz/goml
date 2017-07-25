@@ -3,10 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
-	"github.com/JulzDiverse/goml/goml"
+	"github.com/JulzDiverse/goml"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
@@ -74,10 +73,7 @@ func getParam(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	yaml, err := goml.ReadYamlFromFile(c.String("file"))
-	exitWithError(err)
-
-	res, err := goml.Get(yaml, c.String("prop"))
+	res, err := goml.GetFromFile(c.String("file"), c.String("prop"))
 	exitWithError(err)
 
 	fmt.Println(res)
@@ -89,21 +85,14 @@ func setParam(c *cli.Context) {
 		exitWithError(errors.New("invalid number of arguments"))
 	}
 
-	yaml, err := goml.ReadYamlFromFile(c.String("file"))
-	exitWithError(err)
-
-	var value string
+	var err error
 	if c.String("value") != "" {
-		value = c.String("value")
+		value := c.String("value")
+		err = goml.SetInFile(c.String("file"), c.String("prop"), value)
 	} else if c.String("key") != "" {
-		bytes, err := ioutil.ReadFile(c.String("key"))
-		exitWithError(err)
-		value = string(bytes)
+		err = goml.SetKeyInFile(c.String("file"), c.String("prop"), c.String("key"))
 	}
-
-	err = goml.Set(yaml, c.String("prop"), value)
 	exitWithError(err)
-	goml.WriteYaml(yaml, c.String("file"))
 }
 
 func deleteParam(c *cli.Context) {
@@ -112,15 +101,8 @@ func deleteParam(c *cli.Context) {
 		exitWithError(errors.New("invalid number of arguments"))
 	}
 
-	yaml, err := goml.ReadYamlFromFile(c.String("file"))
+	err := goml.DeleteInFile(c.String("file"), c.String("prop"))
 	exitWithError(err)
-
-	err = goml.Delete(yaml, c.String("prop"))
-	if err != nil {
-		exitWithError(errors.New("Couldn't delete property for path: " + c.String("prop")))
-	}
-
-	goml.WriteYaml(yaml, c.String("file"))
 }
 
 func transferParam(c *cli.Context) {
@@ -129,18 +111,8 @@ func transferParam(c *cli.Context) {
 		exitWithError(errors.New("invalid number of arguments"))
 	}
 
-	sourceYaml, err := goml.ReadYamlFromFile(c.String("file"))
+	err := goml.TransferToFile(c.String("file"), c.String("prop"), c.String("df"), c.String("dp"))
 	exitWithError(err)
-
-	destYaml, err := goml.ReadYamlFromFile(c.String("df"))
-	exitWithError(err)
-
-	value, _ := goml.Get(sourceYaml, c.String("prop"))
-
-	err = goml.Set(destYaml, c.String("dp"), value)
-	exitWithError(err)
-
-	goml.WriteYaml(destYaml, c.String("df"))
 }
 
 func exitWithError(err error) {
