@@ -37,11 +37,37 @@ func DeleteInFile(file string, path string) error {
 	return WriteYaml(yaml, file)
 }
 
+func stringInSlice(element string, array []interface{}) (bool, int){
+	for i := 0; i < len(array); i++ {
+	 if array[i] == element {
+		 return true, i
+	 }
+
+  }
+	return false, 0
+}
+
 func Delete(yml *simpleyaml.Yaml, path string) error {
 	propsArr := strings.Split(path, ".")
 	propName := propsArr[len(propsArr)-1]
 	props := propsArr[:len(propsArr)-1]
 	newPath := strings.Join(props, ".")
+
+	yaml_pointer, _ := get(yml, newPath)
+	path_array, _ := yaml_pointer.Array()
+	doesNameExist, my_index := stringInSlice(propName, path_array)
+
+  if doesNameExist == true {
+		tmp, props := get(yml, newPath)
+		prop, err := tmp.Array()
+		if err != nil {
+			return err
+		}
+		prop = append(prop[:my_index], prop[my_index+1:]...)
+
+		updateYaml(yml, props, prop)
+		return nil
+  }
 
 	if index, err := strconv.Atoi(propName); err == nil {
 		tmp, props := get(yml, newPath)
@@ -49,13 +75,11 @@ func Delete(yml *simpleyaml.Yaml, path string) error {
 		if err != nil {
 			return err
 		}
-
 		prop = append(prop[:index], prop[index+1:]...)
 
 		updateYaml(yml, props, prop)
 		return nil
 	}
-
 	if strings.Contains(propName, ":") {
 		tmp, props := get(yml, newPath)
 		prop, err := tmp.Array()
