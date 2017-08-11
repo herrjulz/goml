@@ -2,7 +2,7 @@ package goml_test
 
 import (
 	. "github.com/JulzDiverse/goml"
-	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/smallfish/simpleyaml"
@@ -14,7 +14,7 @@ var _ = Describe("Delete", func() {
 
 	BeforeEach(func() {
 		yaml := `map:
-  name: fosil
+  name: foo
 
 array:
 - bar
@@ -49,7 +49,6 @@ mapArray:
 	})
 
 	It("should delete a value from an array based on index", func() {
-		fmt.Println("ss")
 		err = Delete(yml, "array.0")
 		Expect(err).NotTo(HaveOccurred())
 
