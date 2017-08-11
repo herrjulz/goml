@@ -2,7 +2,7 @@ package goml_test
 
 import (
 	. "github.com/JulzDiverse/goml"
-
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/smallfish/simpleyaml"
@@ -14,7 +14,7 @@ var _ = Describe("Delete", func() {
 
 	BeforeEach(func() {
 		yaml := `map:
-  name: foo
+  name: fosil
 
 array:
 - bar
@@ -32,7 +32,7 @@ mapArray:
   boo: laa`
 
 		yml, err = simpleyaml.NewYaml([]byte(yaml))
-		Expect(err).NotTo(HaveOccurred())
+		Expect(err).NotTo(	HaveOccurred())
 	})
 
 	It("should delete a value from a map", func() {
@@ -43,7 +43,13 @@ mapArray:
 		Expect(err).To(MatchError("property not found"))
 	})
 
-	It("should delete a value from an array ", func() {
+	It("should delete a value from an array based on name", func() {
+		err = Delete(yml, "array.bar")
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("should delete a value from an array based on index", func() {
+		fmt.Println("ss")
 		err = Delete(yml, "array.0")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -52,6 +58,7 @@ mapArray:
 
 		err = Delete(yml, "array.:zar")
 		Expect(err).NotTo(HaveOccurred())
+
 		_, err = Get(yml, "array.:zar")
 		Expect(err).To(MatchError("property not found"))
 	})
