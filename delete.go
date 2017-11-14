@@ -37,6 +37,27 @@ func DeleteInFile(file string, path string) error {
 	return WriteYaml(yaml, file)
 }
 
+func DeleteInMemory(file []byte, path string) ([]byte, error) {
+	yaml := simpleyaml.NewYaml(file)
+
+	err = Delete(yaml, path)
+	if err != nil {
+		return nil, errors.New("Couldn't delete property for path: " + path)
+	}
+
+	yamlMap, err := yaml.Map()
+	if err != nil {
+		return nil, err
+	}
+
+	yamlBytes, err := yaml.Marshal(yamlMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return yamlBytes, nil
+}
+
 func Delete(yml *simpleyaml.Yaml, path string) error {
 	propsArr := strings.Split(path, ".")
 	propName := propsArr[len(propsArr)-1]

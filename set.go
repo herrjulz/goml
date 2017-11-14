@@ -45,6 +45,30 @@ func SetInFile(file string, path string, val interface{}) error {
 	return WriteYaml(yaml, file)
 }
 
+func SetInMemory(file []byte, path string, val interface{}) ([]byte, error) {
+	yaml, err := ReadYamlFromFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = Set(yaml, path, val)
+	if err != nil {
+		return nil, err
+	}
+
+	yamlMap, err := yaml.Map()
+	if err != nil {
+		return nil, err
+	}
+
+	yamlBytes, err := yaml.Marshal(yamlMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return yamlBytes, nil
+}
+
 func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	propsArr := strings.Split(path, ".")
 	propName := propsArr[len(propsArr)-1]
