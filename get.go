@@ -17,6 +17,15 @@ func GetFromFile(file string, path string) (interface{}, error) {
 	return Get(yaml, path)
 }
 
+func GetInMemory(file []byte, path string) (interface{}, error) {
+	yml, err := simpleyaml.NewYaml(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return Get(yml, path)
+}
+
 func GetFromFileAsSimpleYaml(file string, path string) (*simpleyaml.Yaml, error) {
 	yaml, err := ReadYamlFromFile(file)
 	if err != nil {
