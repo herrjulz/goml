@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/smallfish/simpleyaml"
 )
 
@@ -46,27 +48,27 @@ func SetInFile(file string, path string, val interface{}) error {
 }
 
 func SetInMemory(file []byte, path string, val interface{}) ([]byte, error) {
-	yaml, err := ReadYamlFromFile(file)
+	yml, err := simpleyaml.NewYaml(file)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Set(yaml, path, val)
+	err = Set(yml, path, val)
 	if err != nil {
 		return nil, err
 	}
 
-	yamlMap, err := yaml.Map()
+	ymlMap, err := yml.Map()
 	if err != nil {
 		return nil, err
 	}
 
-	yamlBytes, err := yaml.Marshal(yamlMap)
+	ymlBytes, err := yaml.Marshal(ymlMap)
 	if err != nil {
 		return nil, err
 	}
 
-	return yamlBytes, nil
+	return ymlBytes, nil
 }
 
 func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {

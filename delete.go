@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/smallfish/simpleyaml"
 )
 
@@ -38,24 +40,27 @@ func DeleteInFile(file string, path string) error {
 }
 
 func DeleteInMemory(file []byte, path string) ([]byte, error) {
-	yaml := simpleyaml.NewYaml(file)
+	yml, err := simpleyaml.NewYaml(file)
+	if err != nil {
+		return nil, err
+	}
 
-	err = Delete(yaml, path)
+	err = Delete(yml, path)
 	if err != nil {
 		return nil, errors.New("Couldn't delete property for path: " + path)
 	}
 
-	yamlMap, err := yaml.Map()
+	ymlMap, err := yml.Map()
 	if err != nil {
 		return nil, err
 	}
 
-	yamlBytes, err := yaml.Marshal(yamlMap)
+	ymlBytes, err := yaml.Marshal(ymlMap)
 	if err != nil {
 		return nil, err
 	}
 
-	return yamlBytes, nil
+	return ymlBytes, nil
 }
 
 func Delete(yml *simpleyaml.Yaml, path string) error {
