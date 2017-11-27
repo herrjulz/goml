@@ -11,9 +11,9 @@ import (
 var _ = Describe("Delete", func() {
 	var yml *simpleyaml.Yaml
 	var err error
-
+	var yaml string
 	BeforeEach(func() {
-		yaml := `map:
+		yaml = `map:
   name: foo
 
 array:
@@ -33,6 +33,12 @@ mapArray:
 
 		yml, err = simpleyaml.NewYaml([]byte(yaml))
 		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("should also delete", func() {
+		yam, _ := DeleteInMemory([]byte(yaml), "array.:lar")
+		//Expect(err).ToNot(HaveOccurred())
+		Expect(1).To(Equal(2))
 	})
 
 	It("should delete a value from a map", func() {
