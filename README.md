@@ -20,7 +20,7 @@ $ wget -O /usr/local/bin/goml https://github.com/JulzDiverse/goml/releases/downl
 **Using Homebrew:**
 
 ```
-$ brew tab julzdiverse/tools  
+$ brew tap julzdiverse/tools  
 $ brew install goml
 ```
 
