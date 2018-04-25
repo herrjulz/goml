@@ -1,7 +1,6 @@
 package goml
 
 import (
-	"errors"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -9,6 +8,11 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/smallfish/simpleyaml"
+)
+
+const (
+	ADDMAP   = "GOML_ADD_MAP"
+	ADDARRAY = "GOML_ADD_ARRAY"
 )
 
 func SetKeyInFile(file string, path string, key string) error {
@@ -48,6 +52,10 @@ func SetInFile(file string, path string, val interface{}) error {
 }
 
 func SetInMemory(file []byte, path string, val interface{}) ([]byte, error) {
+	if len(file) == 0 {
+		file = append(file, []byte(`{}`)...)
+	}
+
 	yml, err := simpleyaml.NewYaml(file)
 	if err != nil {
 		return nil, err
@@ -80,7 +88,10 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 	if index, err := strconv.Atoi(propName); err == nil {
 		tmp, props := get(yml, newPath)
 		if props == nil {
-			return errors.New("property not found")
+			if err = Set(yml, newPath, ADDARRAY); err != nil {
+				return err //errors.New("SORRY CANNOT DO THAT. property not found")
+			}
+			tmp, props = get(yml, newPath)
 		}
 
 		prop, err := tmp.Array()
@@ -88,7 +99,7 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 			return err
 		}
 
-		prop[index] = convertValueType(val)
+		prop[index] = convertValueType(setValueOrAddChild(val))
 
 		updateYaml(yml, props, prop)
 		return nil
@@ -100,6 +111,7 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		if err != nil {
 			return err
 		}
+
 		resolved := convertValueType(val)
 		prop = append(prop, resolved)
 		updateYaml(yml, props, prop)
@@ -110,34 +122,54 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		tmp, props := get(yml, newPath)
 		prop, err := tmp.Array()
 		if err != nil {
-			return err
+			if err = Set(yml, newPath, ADDARRAY); err != nil {
+				return err //errors.New("SORRY CANNOT DO THAT. property not found")
+			}
+			tmp, props = get(yml, newPath)
+			prop, err = tmp.Array()
 		}
 
 		index, err := returnIndexForProp(propName, prop)
 		if err != nil {
-			return err
+			index = createArrayEntry(propName, &prop)
+		} else {
+			prop[index] = convertValueType(setValueOrAddChild(val))
 		}
 
-		prop[index] = convertValueType(val)
 		updateYaml(yml, props, prop)
 		return nil
 	}
 
 	if len(propsArr) == 1 {
 		prop, _ := yml.Map()
-		prop[path] = convertValueType(val)
+		prop[path] = convertValueType(setValueOrAddChild(val))
 		return nil
 	}
 
 	tmp, _ := get(yml, newPath)
 	prop, err := tmp.Map()
 	if err != nil {
-		return err
+		if err = Set(yml, newPath, ADDMAP); err != nil {
+			return err
+		}
+		tmp, _ = get(yml, newPath)
+		prop, err = tmp.Map()
 	}
 
-	prop[propName] = convertValueType(val)
+	prop[propName] = convertValueType(setValueOrAddChild(val))
 
 	return nil
+}
+
+func setValueOrAddChild(val interface{}) interface{} {
+	switch val {
+	case ADDMAP:
+		m := make(map[interface{}]interface{})
+		return m
+	case ADDARRAY:
+		return []interface{}{}
+	}
+	return val
 }
 
 func SetValueForType(yaml *simpleyaml.Yaml, path string, value *simpleyaml.Yaml) error {

@@ -99,6 +99,10 @@ func ReadYamlFromFile(filename string) (*simpleyaml.Yaml, error) {
 		return nil, err
 	}
 
+	if len(file) == 0 {
+		file = append(file, []byte(`{}`)...)
+	}
+
 	return simpleyaml.NewYaml(file)
 }
 
@@ -123,4 +127,15 @@ func returnIndexForProp(propName string, array []interface{}) (int, error) {
 	}
 
 	return 0, errors.New("property not found")
+}
+
+func createArrayEntry(propName string, array *[]interface{}) int {
+	keyVal := strings.Split(propName, ":")
+	key, val := keyVal[0], keyVal[1]
+	fmt.Println("KEY:", key, "VAL", val)
+	m := make(map[interface{}]interface{})
+	m[key] = val
+	*array = append(*array, m)
+
+	return len(*array) - 1
 }

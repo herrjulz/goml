@@ -55,4 +55,18 @@ mapArray:
 		err = Set(yml, "mapArray.foo:wolverine.arr.0", "new")
 		Expect(Get(yml, "mapArray.foo:wolverine.arr.0")).To(Equal("new"))
 	})
+
+	Context("If a path does not exist", func() {
+		It("should create the path", func() {
+			err = Set(yml, "map.awesome", "bam")
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(Get(yml, "map.awesome")).To(Equal("bam"))
+
+			err = Set(yml, "mapArray.luffy:gomugomuno.beat", "katakuri")
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(Get(yml, "mapArray.luffy:gomugomuno.beat")).To(Equal("katakuri"))
+		})
+	})
 })
