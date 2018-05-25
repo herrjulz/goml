@@ -76,19 +76,19 @@ $ goml get -f sample.yml -p array.1
 // returns two
 ```
 
+**Map Arrays**
+
 Get value from array which contains maps:
 
 ```
-$ goml get -f sample.yml -p array.0.name
-// return foo
+$ goml get -f sample.yml -p mapArray.0.name
+// returns foo
 ```
-
-**Map Arrays**
 
 Get value from array which contains maps by an identifier:
 
 ```
-$ goml get -f sample.yml -p array.id:two.name
+$ goml get -f sample.yml -p mapArray.id:two.name
 // returns bar
 ```
 
