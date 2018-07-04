@@ -20,7 +20,7 @@ func main() {
 	}
 	cmd.Name = "goml"
 	cmd.Usage = "CLI Tool to do CRUD like manipulation on YAML files"
-	cmd.Version = "0.3.0"
+	cmd.Version = "0.4.0"
 	cmd.Commands = []cli.Command{
 		{
 			Name:   "get",
