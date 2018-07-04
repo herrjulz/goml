@@ -83,4 +83,41 @@ mapArray:
 		_, err = Get(yml, "mapArray.foo:bar.arr.:two")
 		Expect(err).To(MatchError("property not found"))
 	})
+
+	Context("Using the | delimiter", func() {
+		It("should delete a value from an array ", func() {
+			err = Delete(yml, "array.0")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err := Get(yml, "array.|bar")
+			Expect(err).To(MatchError("property not found"))
+
+			err = Delete(yml, "array.|zar")
+			Expect(err).NotTo(HaveOccurred())
+			_, err = Get(yml, "array.|zar")
+			Expect(err).To(MatchError("property not found"))
+		})
+
+		It("should delete a value from an map inside an array ", func() {
+			err = Delete(yml, "mapArray.foo|bar.zoo")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err := Get(yml, "mapArray.foo|bar.zoo")
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("should delete a value from an array inside a map which in turn is inside an array ", func() {
+			err = Delete(yml, "mapArray.foo|bar.arr.0")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err := Get(yml, "mapArray.foo|bar.arr.|one")
+			Expect(err).To(MatchError("property not found"))
+
+			err = Delete(yml, "mapArray.foo|bar.arr.|two")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = Get(yml, "mapArray.foo|bar.arr.|two")
+			Expect(err).To(MatchError("property not found"))
+		})
+	})
 })

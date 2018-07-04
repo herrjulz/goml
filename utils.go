@@ -108,6 +108,10 @@ func ReadYamlFromFile(filename string) (*simpleyaml.Yaml, error) {
 
 func returnIndexForProp(propName string, array []interface{}) (int, error) {
 	keyVal := strings.Split(propName, ":")
+	if len(keyVal) < 2 {
+		keyVal = strings.Split(propName, "|")
+	}
+
 	key, val := keyVal[0], keyVal[1]
 
 	for i, _ := range array {
@@ -131,6 +135,10 @@ func returnIndexForProp(propName string, array []interface{}) (int, error) {
 
 func createArrayEntry(propName string, array *[]interface{}) int {
 	keyVal := strings.Split(propName, ":")
+	if len(keyVal) < 2 {
+		keyVal = strings.Split(propName, "|")
+	}
+
 	key, val := keyVal[0], keyVal[1]
 	fmt.Println("KEY:", key, "VAL", val)
 	m := make(map[interface{}]interface{})

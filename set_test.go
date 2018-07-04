@@ -69,4 +69,18 @@ mapArray:
 			Expect(Get(yml, "mapArray.luffy:gomugomuno.beat")).To(Equal("katakuri"))
 		})
 	})
+
+	Context("using the | delimiter", func() {
+		It("should add an value to an array", func() {
+			err = Set(yml, "mapArray.foo|var.boo", "baymax")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(Get(yml, "mapArray.foo|var.boo")).To(Equal("baymax"))
+			err = Set(yml, "array.+", "pikachu")
+			Expect(Get(yml, "array.|pikachu")).To(Equal("pikachu"))
+			err = Set(yml, "array.|pikachu", "ruffy")
+			Expect(Get(yml, "array.|ruffy")).To(Equal("ruffy"))
+			err = Set(yml, "mapArray.foo|bar.arr.0", "new")
+			Expect(Get(yml, "mapArray.foo|bar.arr.0")).To(Equal("new"))
+		})
+	})
 })

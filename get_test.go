@@ -60,4 +60,24 @@ mapArray:
 		Expect(err).NotTo(HaveOccurred())
 		Expect(value).To(Equal("one"))
 	})
+
+	Context("Using the | delimiter", func() {
+		It("should get a value from a array inside a map", func() {
+			value, err := Get(yml, "mapArray.foo|bar.arr.0")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(value).To(Equal("one"))
+		})
+
+		It("should get a vlaue from a map", func() {
+			value, err := Get(yml, "mapArray.foo|var.boo")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(value).To(Equal("laa"))
+		})
+
+		It("should get a value form an array", func() {
+			value, err := Get(yml, "array.|var")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(value).To(Equal("var"))
+		})
+	})
 })

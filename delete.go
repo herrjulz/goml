@@ -82,7 +82,7 @@ func Delete(yml *simpleyaml.Yaml, path string) error {
 		return nil
 	}
 
-	if strings.Contains(propName, ":") {
+	if strings.Contains(propName, ":") || strings.Contains(propName, "|") {
 		tmp, props := get(yml, newPath)
 		prop, err := tmp.Array()
 		if err != nil {

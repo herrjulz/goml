@@ -118,7 +118,7 @@ func Set(yml *simpleyaml.Yaml, path string, val interface{}) error {
 		return nil
 	}
 
-	if strings.Contains(propName, ":") {
+	if strings.Contains(propName, ":") || strings.Contains(propName, "|") {
 		tmp, props := get(yml, newPath)
 		prop, err := tmp.Array()
 		if err != nil {

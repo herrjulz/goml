@@ -65,7 +65,7 @@ func get(yml *simpleyaml.Yaml, path string) (*simpleyaml.Yaml, []string) {
 			continue
 		}
 
-		if strings.Contains(p, ":") {
+		if strings.Contains(p, ":") || strings.Contains(p, "|") {
 			if prop, err := yml.Array(); err == nil {
 				index, err := returnIndexForProp(p, prop)
 				if err != nil {
