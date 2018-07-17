@@ -42,7 +42,7 @@ func main() {
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
 				cli.StringFlag{Name: "value, v", Usage: "value for the defined property"},
 				cli.StringFlag{Name: "key, k", Usage: "private key file"},
-				cli.BoolFlag{Name: "dry-run, d", Usage: "do a dry run"},
+				cli.BoolFlag{Name: "dry-run, d", Usage: "print set result to stdout"},
 			},
 		},
 		{
