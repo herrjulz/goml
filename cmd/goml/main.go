@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/JulzDiverse/goml"
 	"github.com/fatih/color"
@@ -20,7 +22,7 @@ func main() {
 	}
 	cmd.Name = "goml"
 	cmd.Usage = "CLI Tool to do CRUD like manipulation on YAML files"
-	cmd.Version = "0.4.0"
+	cmd.Version = "0.5.0"
 	cmd.Commands = []cli.Command{
 		{
 			Name:   "get",
@@ -40,6 +42,7 @@ func main() {
 				cli.StringFlag{Name: "prop, p", Usage: "property path string - foo.bar.zoo"},
 				cli.StringFlag{Name: "value, v", Usage: "value for the defined property"},
 				cli.StringFlag{Name: "key, k", Usage: "private key file"},
+				cli.BoolFlag{Name: "dry-run, d", Usage: "do a dry run"},
 			},
 		},
 		{
@@ -80,18 +83,35 @@ func getParam(c *cli.Context) {
 }
 
 func setParam(c *cli.Context) {
-	if c.NumFlags() != 6 {
-		cli.ShowAppHelp(c)
-		exitWithError(errors.New("invalid number of arguments"))
+	var key, value string
+	keyVal := strings.Split(c.String("prop"), "=")
+	key = keyVal[0]
+	if len(keyVal) == 2 {
+		value = keyVal[1]
+	}
+	if c.String("value") != "" {
+		value = c.String("value")
+	}
+	if value == "" {
+		//exitWithError(errors.New("No value provided"))
 	}
 
 	var err error
-	if c.String("value") != "" {
-		value := c.String("value")
-		err = goml.SetInFile(c.String("file"), c.String("prop"), value)
-	} else if c.String("key") != "" {
-		err = goml.SetKeyInFile(c.String("file"), c.String("prop"), c.String("key"))
+	if c.String("key") != "" {
+		err = goml.SetKeyInFile(c.String("file"), key, c.String("key"))
+	} else {
+		if c.Bool("dry-run") {
+			bytes, err := ioutil.ReadFile(c.String("file"))
+			exitWithError(err)
+			output, err := goml.SetInMemory(bytes, key, value)
+			exitWithError(err)
+			fmt.Println(string(output))
+		} else {
+			err = goml.SetInFile(c.String("file"), key, value)
+		}
+
 	}
+
 	exitWithError(err)
 }
 
