@@ -140,7 +140,6 @@ func createArrayEntry(propName string, array *[]interface{}) int {
 	}
 
 	key, val := keyVal[0], keyVal[1]
-	fmt.Println("KEY:", key, "VAL", val)
 	m := make(map[interface{}]interface{})
 	m[key] = val
 	*array = append(*array, m)
