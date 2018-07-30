@@ -1,6 +1,7 @@
 package goml
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -51,7 +52,7 @@ func SetInFile(file string, path string, val interface{}) error {
 	return WriteYaml(yaml, file)
 }
 
-func SetInMemory(file []byte, path string, val interface{}) ([]byte, error) {
+func SetInMemory(file []byte, path string, val interface{}, asJson bool) ([]byte, error) {
 	if len(file) == 0 {
 		file = append(file, []byte(`{}`)...)
 	}
@@ -71,9 +72,17 @@ func SetInMemory(file []byte, path string, val interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	ymlBytes, err := yaml.Marshal(ymlMap)
-	if err != nil {
-		return nil, err
+	var ymlBytes []byte
+	if asJson {
+		ymlBytes, err = json.Marshal(ymlMap)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		ymlBytes, err = yaml.Marshal(ymlMap)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return ymlBytes, nil

@@ -43,6 +43,7 @@ func main() {
 				cli.StringFlag{Name: "value, v", Usage: "value for the defined property"},
 				cli.StringFlag{Name: "key, k", Usage: "private key file"},
 				cli.BoolFlag{Name: "dry-run, d", Usage: "print set result to stdout"},
+				cli.BoolFlag{Name: "json, j", Usage: "format output as json"},
 			},
 		},
 		{
@@ -63,6 +64,14 @@ func main() {
 				cli.StringFlag{Name: "prop, p", Usage: "property path (string) - foo.bar.zoo"},
 				cli.StringFlag{Name: "df", Usage: "destination YAML file"},
 				cli.StringFlag{Name: "dp", Usage: "destination property path (string) - foo.bar.zoo"},
+			},
+		},
+		{
+			Name:   "paths",
+			Usage:  "Get paths of a yaml file",
+			Action: getPaths,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
 			},
 		},
 	}
@@ -100,13 +109,12 @@ func setParam(c *cli.Context) {
 		if c.Bool("dry-run") {
 			bytes, err := ioutil.ReadFile(c.String("file"))
 			exitWithError(err)
-			output, err := goml.SetInMemory(bytes, key, value)
+			output, err := goml.SetInMemory(bytes, key, value, c.Bool("json"))
 			exitWithError(err)
 			fmt.Println(string(output))
 		} else {
 			err = goml.SetInFile(c.String("file"), key, value)
 		}
-
 	}
 
 	exitWithError(err)
@@ -130,6 +138,19 @@ func transferParam(c *cli.Context) {
 
 	err := goml.TransferToFile(c.String("file"), c.String("prop"), c.String("df"), c.String("dp"))
 	exitWithError(err)
+}
+
+func getPaths(c *cli.Context) {
+	filepath := c.String("file")
+	file, err := ioutil.ReadFile(filepath)
+	exitWithError(err)
+
+	paths, err := goml.GetPaths(file)
+	exitWithError(err)
+
+	for _, path := range paths {
+		fmt.Println(path)
+	}
 }
 
 func exitWithError(err error) {
