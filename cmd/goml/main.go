@@ -92,9 +92,6 @@ func setParam(c *cli.Context) {
 	if c.String("value") != "" {
 		value = c.String("value")
 	}
-	if value == "" {
-		//exitWithError(errors.New("No value provided"))
-	}
 
 	var err error
 	if c.String("key") != "" {

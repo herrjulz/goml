@@ -11,9 +11,10 @@ import (
 var _ = Describe("Get", func() {
 	var yml *simpleyaml.Yaml
 	var err error
+	var yaml string
 
 	BeforeEach(func() {
-		yaml := `map:
+		yaml = `map:
   name: foo
 
 array:
@@ -80,4 +81,5 @@ mapArray:
 			Expect(value).To(Equal("var"))
 		})
 	})
+
 })
