@@ -72,7 +72,18 @@ func convertValueType(val interface{}) interface{} {
 }
 
 func WriteYaml(yml *simpleyaml.Yaml, file string) error {
-	goml, err := yml.Map()
+	var (
+		err  error
+		goml interface{}
+	)
+	switch {
+	case yml.IsMap():
+		goml, err = yml.Map()
+	case yml.IsArray():
+		goml, err = yml.Array()
+	default:
+		err = errors.New("Unexpected yml structure after manipulation")
+	}
 	if err != nil {
 		return err
 	}
