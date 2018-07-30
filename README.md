@@ -14,7 +14,7 @@ Additionally, you can **transfer** properties from one YAML to another YAML
 ### OS X
 
 ```bash
-$ wget -O /usr/local/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.5.0/goml-darwin-amd64 && chmod +x /usr/local/bin/goml
+$ wget -O /usr/local/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.6.0/goml-darwin-amd64 && chmod +x /usr/local/bin/goml
 ```
 
 **Using Homebrew:**
@@ -27,7 +27,7 @@ $ brew install goml
 ### Linux
 
 ```bash
-$ wget -O /usr/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.5.0/goml-linux-amd64 && chmod +x /usr/bin/goml
+$ wget -O /usr/bin/goml https://github.com/JulzDiverse/goml/releases/download/v0.6.0/goml-linux-amd64 && chmod +x /usr/bin/goml
 ```
 
 ## Usage

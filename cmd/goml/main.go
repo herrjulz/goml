@@ -22,7 +22,7 @@ func main() {
 	}
 	cmd.Name = "goml"
 	cmd.Usage = "CLI Tool to do CRUD like manipulation on YAML files"
-	cmd.Version = "0.5.0"
+	cmd.Version = "0.6.0"
 	cmd.Commands = []cli.Command{
 		{
 			Name:   "get",
@@ -91,9 +91,6 @@ func setParam(c *cli.Context) {
 	}
 	if c.String("value") != "" {
 		value = c.String("value")
-	}
-	if value == "" {
-		//exitWithError(errors.New("No value provided"))
 	}
 
 	var err error
