@@ -43,6 +43,7 @@ func main() {
 				cli.StringFlag{Name: "value, v", Usage: "value for the defined property"},
 				cli.StringFlag{Name: "key, k", Usage: "private key file"},
 				cli.BoolFlag{Name: "dry-run, d", Usage: "print set result to stdout"},
+				cli.BoolFlag{Name: "json, j", Usage: "format output as json"},
 			},
 		},
 		{
@@ -100,13 +101,12 @@ func setParam(c *cli.Context) {
 		if c.Bool("dry-run") {
 			bytes, err := ioutil.ReadFile(c.String("file"))
 			exitWithError(err)
-			output, err := goml.SetInMemory(bytes, key, value)
+			output, err := goml.SetInMemory(bytes, key, value, c.Bool("json"))
 			exitWithError(err)
 			fmt.Println(string(output))
 		} else {
 			err = goml.SetInFile(c.String("file"), key, value)
 		}
-
 	}
 
 	exitWithError(err)
