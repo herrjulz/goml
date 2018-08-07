@@ -66,6 +66,14 @@ func main() {
 				cli.StringFlag{Name: "dp", Usage: "destination property path (string) - foo.bar.zoo"},
 			},
 		},
+		{
+			Name:   "paths",
+			Usage:  "Get paths of a yaml file",
+			Action: getPaths,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "file, f", Usage: "path to YAML file"},
+			},
+		},
 	}
 	cmd.Run(os.Args)
 }
@@ -130,6 +138,19 @@ func transferParam(c *cli.Context) {
 
 	err := goml.TransferToFile(c.String("file"), c.String("prop"), c.String("df"), c.String("dp"))
 	exitWithError(err)
+}
+
+func getPaths(c *cli.Context) {
+	filepath := c.String("file")
+	file, err := ioutil.ReadFile(filepath)
+	exitWithError(err)
+
+	paths, err := goml.GetPaths(file)
+	exitWithError(err)
+
+	for _, path := range paths {
+		fmt.Println(path)
+	}
 }
 
 func exitWithError(err error) {

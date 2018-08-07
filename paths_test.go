@@ -9,7 +9,7 @@ import (
 	. "github.com/JulzDiverse/goml"
 )
 
-var _ = FDescribe("Paths", func() {
+var _ = XDescribe("Paths", func() {
 	Context("When retrieving paths of a yaml file", func() {
 
 		var (
