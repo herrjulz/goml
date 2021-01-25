@@ -75,7 +75,11 @@ func main() {
 			},
 		},
 	}
-	cmd.Run(os.Args)
+
+	err := cmd.Run(os.Args)
+	if err != nil {
+		os.Exit(1)
+	}
 }
 
 func getParam(c *cli.Context) {
