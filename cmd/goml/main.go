@@ -156,7 +156,7 @@ func getPaths(c *cli.Context) {
 func exitWithError(err error) {
 	if err != nil {
 		r := color.New(color.FgHiRed)
-		r.Println(err)
+		r.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

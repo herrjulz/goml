@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -42,7 +43,7 @@ func ExtractType(value *simpleyaml.Yaml) (interface{}, error) {
 func extractArrayType(value interface{}) string {
 	switch t := value.(type) {
 	default:
-		fmt.Printf("unexpected type %T\n", t)
+		fmt.Fprintf(os.Stderr, "unexpected type %T\n", t)
 	case string:
 		return value.(string)
 	case bool:
