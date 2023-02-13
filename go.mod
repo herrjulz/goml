@@ -1,6 +1,6 @@
 module github.com/herrjulz/goml
 
-go 1.17
+go 1.19
 
 require (
 	github.com/JulzDiverse/goml v0.7.0
